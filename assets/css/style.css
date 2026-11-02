@@ -1914,9 +1914,14 @@ ul {
 
 /* ============================ NOTA BERSUARA ============================ */
 
-.notes-card {
+.notes-wrap {
+  display: grid;
+  gap: 14px;
   margin: 0 0 30px;
-  padding: clamp(17px, 2.6vw, 24px);
+}
+
+.notes-head-card {
+  padding: clamp(17px, 2.6vw, 22px);
   border-radius: var(--radius-lg);
   background:
     radial-gradient(circle at 94% 0%, rgba(20, 154, 114, .09), transparent 34%),
@@ -1931,8 +1936,6 @@ ul {
   justify-content: space-between;
   gap: 18px;
   flex-wrap: wrap;
-  padding-bottom: 15px;
-  border-bottom: 1px solid var(--line);
 }
 
 .notes-kicker {
@@ -1964,7 +1967,7 @@ ul {
 }
 
 .notes-title p {
-  max-width: 540px;
+  max-width: 560px;
   margin-top: 4px;
   font-size: .77rem;
   line-height: 1.55;
@@ -2034,43 +2037,48 @@ ul {
   border-color: var(--gold-300);
 }
 
-.note-list {
-  display: grid;
-  gap: 9px;
-  margin-top: 14px;
-}
-
-.note-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 13px;
-  padding: 13px 14px;
-  border-radius: 16px;
+/* Kad nota: butang audio terus bersama kandungan nota */
+.note-block {
+  overflow: hidden;
   border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
   background: #fff;
-  transition: border-color var(--transition), background var(--transition), box-shadow var(--transition), transform var(--transition);
+  transition: border-color var(--transition), box-shadow var(--transition);
 }
 
-.note-item:hover {
-  border-color: var(--mint-200);
-  transform: translateY(-1px);
-}
-
-.note-item.is-active {
+.note-block.is-active {
   border-color: var(--gold-400);
-  background: linear-gradient(135deg, #fffaf0, #fff);
-  box-shadow: 0 0 0 3px rgba(224, 183, 93, .1);
+  box-shadow: 0 0 0 3px rgba(224, 183, 93, .08), var(--shadow-sm);
 }
 
-.note-item.is-done {
+.note-block.is-done {
   border-color: #c9e9da;
-  background: linear-gradient(135deg, var(--success-bg), #fff);
+}
+
+.note-audio {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 13px 15px;
+  background: #f8fbf9;
+  border-bottom: 1px solid var(--line);
+  transition: background var(--transition);
+}
+
+.note-block.is-active .note-audio {
+  background: linear-gradient(135deg, var(--gold-100), #fffdf7);
+  border-bottom-color: var(--gold-200);
+}
+
+.note-block.is-done .note-audio {
+  background: linear-gradient(135deg, var(--success-bg), #f9fdfb);
+  border-bottom-color: #d9efe4;
 }
 
 .note-play {
   flex: none;
-  width: 44px;
-  height: 44px;
+  width: 45px;
+  height: 45px;
   display: grid;
   place-items: center;
   border: 0;
@@ -2079,7 +2087,6 @@ ul {
   color: #fff;
   box-shadow: 0 9px 18px -12px rgba(11, 107, 79, .8);
   transition: transform var(--transition), background var(--transition), box-shadow var(--transition);
-  margin-top: 2px;
 }
 
 .note-play:hover {
@@ -2087,15 +2094,15 @@ ul {
   box-shadow: 0 12px 22px -12px rgba(11, 107, 79, .85);
 }
 
-.note-item.is-active .note-play {
+.note-block.is-active .note-play {
   background: linear-gradient(135deg, var(--gold-400), var(--gold-500));
   color: #3d2b07;
   box-shadow: 0 9px 18px -12px rgba(185, 138, 50, .8);
 }
 
 .note-play svg {
-  width: 20px;
-  height: 20px;
+  width: 21px;
+  height: 21px;
 }
 
 .note-ico-play {
@@ -2112,27 +2119,28 @@ ul {
   stroke-linecap: round;
 }
 
-.note-item.is-playing .note-ico-play {
+.note-block.is-playing .note-ico-play {
   display: none;
 }
 
-.note-item.is-playing .note-ico-pause {
+.note-block.is-playing .note-ico-pause {
   display: block;
 }
 
-.note-main {
+.note-audio-main {
   flex: 1;
   min-width: 0;
 }
 
-.note-top {
+.note-audio-top {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  gap: 9px;
+  flex-wrap: wrap;
 }
 
 .note-num {
+  flex: none;
   font-size: .57rem;
   font-weight: 800;
   letter-spacing: .11em;
@@ -2140,34 +2148,28 @@ ul {
   color: var(--gold-700);
 }
 
-.note-state {
-  font-size: .62rem;
-  font-weight: 700;
-  color: var(--muted);
-  text-align: right;
-}
-
-.note-item.is-active .note-state {
-  color: var(--gold-700);
-}
-
-.note-item.is-done .note-state {
-  color: var(--success);
-}
-
-.note-main h4 {
-  margin-top: 3px;
+.note-audio-top h4 {
+  margin: 0;
   font-size: .88rem;
   font-weight: 800;
   color: var(--ink);
   letter-spacing: -.01em;
 }
 
-.note-summary {
-  margin-top: 2px;
-  font-size: .75rem;
-  line-height: 1.5;
+.note-state {
+  margin-left: auto;
+  font-size: .62rem;
+  font-weight: 700;
   color: var(--muted);
+  text-align: right;
+}
+
+.note-block.is-active .note-state {
+  color: var(--gold-700);
+}
+
+.note-block.is-done .note-state {
+  color: var(--success);
 }
 
 .note-track {
@@ -2185,7 +2187,7 @@ ul {
   overflow: hidden;
 }
 
-.note-item.is-active .note-bar {
+.note-block.is-active .note-bar {
   background: var(--gold-100);
 }
 
@@ -2211,14 +2213,13 @@ ul {
 
 .note-check {
   flex: none;
-  width: 21px;
-  height: 21px;
+  width: 22px;
+  height: 22px;
   display: none;
   place-items: center;
   border-radius: 50%;
   background: var(--success);
   color: #fff;
-  margin-top: 4px;
 }
 
 .note-check svg {
@@ -2231,8 +2232,35 @@ ul {
   stroke-linejoin: round;
 }
 
-.note-item.is-done .note-check {
+.note-block.is-done .note-check {
   display: grid;
+}
+
+.note-content {
+  padding: clamp(18px, 3vw, 28px);
+}
+
+.note-content > :first-child {
+  margin-top: 0 !important;
+}
+
+.note-content > :last-child {
+  margin-bottom: 0 !important;
+}
+
+.note-content .guideline {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.note-content .guideline-head {
+  margin-bottom: 13px;
+}
+
+.note-content .outcome-card {
+  margin: 0;
 }
 
 .sound-toggle.is-muted {
@@ -2242,7 +2270,7 @@ ul {
 }
 
 @media (max-width: 640px) {
-  .notes-card {
+  .notes-head-card {
     padding: 15px;
   }
 
@@ -2268,30 +2296,52 @@ ul {
     width: auto;
   }
 
-  .note-item {
-    padding: 11px;
+  .note-audio {
+    padding: 11px 12px;
     gap: 10px;
   }
 
   .note-play {
-    width: 40px;
-    height: 40px;
+    width: 41px;
+    height: 41px;
   }
 
-  .note-main h4 {
+  .note-audio-top {
+    gap: 6px;
+  }
+
+  .note-audio-top h4 {
+    flex: 1 1 100%;
     font-size: .84rem;
+    order: 3;
   }
 
-  .note-summary {
-    font-size: .72rem;
+  .note-num {
+    order: 1;
   }
 
   .note-state {
-    font-size: .58rem;
+    order: 2;
+    margin-left: auto;
+    font-size: .57rem;
+  }
+
+  .note-track {
+    margin-top: 5px;
+  }
+
+  .note-time {
+    min-width: 62px;
+    font-size: .57rem;
   }
 
   .note-check {
-    display: none !important;
+    width: 19px;
+    height: 19px;
+  }
+
+  .note-content {
+    padding: 17px 15px;
   }
 }
 

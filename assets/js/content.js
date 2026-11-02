@@ -68,7 +68,7 @@ Renung sejenak. Adakah percakapan saya hari ini menyenangkan orang lain? Adakah 
           <p><strong>Menjaga maruah diri</strong> ialah usaha memelihara diri daripada melakukan larangan Allah SWT serta mengelakkan segala perkara yang boleh mencemarkan kehormatan diri, keluarga dan masyarakat.</p>
         </div>
 
-        <h3>Empat Benteng Maruah</h3>
+        <!--NOTA--><h3>Empat Benteng Maruah</h3>
         <div class="icon-grid">
           <article class="mini-card">
             <span class="mini-num">01</span>
@@ -92,7 +92,7 @@ Renung sejenak. Adakah percakapan saya hari ini menyenangkan orang lain? Adakah 
           </article>
         </div>
 
-        <h3>Cermin yang perlu dijaga setiap hari</h3>
+        <!--NOTA--><h3>Cermin yang perlu dijaga setiap hari</h3>
         <ul class="check-list">
           <li><strong>Di rumah:</strong> bercakap hormat dengan ibu bapa dan membantu kerja rumah tanpa diarah.</li>
           <li><strong>Di sekolah:</strong> tidak meniru dalam ujian, menghormati guru dan menjaga adab di dalam kelas.</li>
@@ -189,7 +189,7 @@ Komitmen peribadi. Saya menjaga maruah diri kerana saya hamba Allah, kerana saya
           <p>Segala yang <strong>baik</strong> membina maruah; segala yang <strong>keji</strong> merosakkannya. Islam mengajar kita memilih yang mulia walaupun sukar, dan menjauhi yang hina walaupun ia kelihatan menyeronokkan.</p>
         </div>
 
-        <h3>Tiga tanggungjawab menjaga maruah</h3>
+        <!--NOTA--><h3>Tiga tanggungjawab menjaga maruah</h3>
         <div class="responsibility-list">
           <article class="resp-item">
             <div class="resp-badge">Diri</div>
@@ -220,7 +220,7 @@ Komitmen peribadi. Saya menjaga maruah diri kerana saya hamba Allah, kerana saya
           <p>Ketika ujian, Aiman diminta meniru jawapan rakannya. Dia teringat pesan gurunya: <em>“Markah boleh dikejar semula, tetapi maruah yang tercalar lebih sukar dipulihkan.”</em> Aiman menolak dengan sopan dan belajar bersungguh-sungguh. Walaupun markahnya sederhana, dia bangga kerana menjaga kejujuran.</p>
         </div>
 
-        <h3>Maruah bukan sombong</h3>
+        <!--NOTA--><h3>Maruah bukan sombong</h3>
         <div class="compare">
           <div class="compare-card good">
             <h4>Menjaga maruah</h4>
@@ -332,7 +332,7 @@ Rumus mudah. Pakaian menutup, percakapan menyejukkan, perlakuan menghormati. Itu
           </ul>
         </section>
 
-        <section class="guideline">
+        <!--NOTA--><section class="guideline">
           <header class="guideline-head">
             <span class="guideline-icon gold">02</span>
             <div>
@@ -348,7 +348,7 @@ Rumus mudah. Pakaian menutup, percakapan menyejukkan, perlakuan menghormati. Itu
           </ul>
         </section>
 
-        <section class="guideline">
+        <!--NOTA--><section class="guideline">
           <header class="guideline-head">
             <span class="guideline-icon teal">03</span>
             <div>
@@ -364,7 +364,7 @@ Rumus mudah. Pakaian menutup, percakapan menyejukkan, perlakuan menghormati. Itu
           </ul>
         </section>
 
-        <figure class="verse verse-compact">
+        <!--NOTA--><figure class="verse verse-compact">
           <div class="verse-ar" dir="rtl" lang="ar">إِنَّ اللَّهَ جَمِيلٌ يُحِبُّ الْجَمَالَ</div>
           <blockquote>“Sesungguhnya Allah itu indah dan Dia menyukai keindahan.”</blockquote>
           <figcaption>Hadis riwayat Muslim</figcaption>
@@ -430,8 +430,7 @@ Muhasabah. Apakah satu tabiat baik yang ingin saya kekalkan selepas modul ini? T
       html: `
         <p class="lead">Setiap pilihan ada akibatnya. Menjaga maruah membuahkan ketenangan dan keberkatan, manakala mengabaikannya mengundang kegelisahan dan kerugian. Mari kita lihat kedua-dua sisi cermin ini.</p>
 
-        <div class="two-col">
-          <section class="outcome-card good">
+        <section class="outcome-card good">
             <span class="outcome-tag">Hikmah</span>
             <h3>Apabila maruah dijaga</h3>
             <ul>
@@ -442,7 +441,8 @@ Muhasabah. Apakah satu tabiat baik yang ingin saya kekalkan selepas modul ini? T
               <li>Menjadi teladan yang baik kepada generasi muda.</li>
             </ul>
           </section>
-          <section class="outcome-card bad">
+
+        <!--NOTA--><section class="outcome-card bad">
             <span class="outcome-tag">Akibat</span>
             <h3>Apabila maruah diabaikan</h3>
             <ul>
@@ -452,10 +452,9 @@ Muhasabah. Apakah satu tabiat baik yang ingin saya kekalkan selepas modul ini? T
               <li>Nama keluarga tercemar dan hubungan terputus.</li>
               <li>Boleh terjerumus kepada gejala sosial dan jenayah.</li>
             </ul>
-          </section>
-        </div>
+        </section>
 
-        <div class="pantun">
+        <!--NOTA--><div class="pantun">
           <div class="pantun-head">
             <span class="pantun-badge">Dikir Barat</span>
             <h3>Keamanan Berkekalan</h3>

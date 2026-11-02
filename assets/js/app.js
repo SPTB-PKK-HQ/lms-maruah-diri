@@ -395,48 +395,55 @@
     return "assets/audio/topik-" + num + "-nota-" + (idx + 1) + ".mp3";
   }
 
-  function notesPanelMarkup(num) {
+  function notesPanelMarkup(num, segments) {
     const notes = notesOf(num);
     const done = listenedNotesCount(num);
     const pct = notes.length ? Math.round((done / notes.length) * 100) : 0;
+    const content = Array.isArray(segments) ? segments : [];
     const items = notes.map(function (note, idx) {
       const listened = isNoteListened(num, idx);
-      return '<article class="note-item' + (listened ? " is-done" : "") + '" data-note="' + idx + '">' +
-        '<button type="button" class="note-play" data-play-note="' + idx + '" aria-label="Mainkan nota ' + (idx + 1) + ': ' + esc(note.title) + '">' +
-          '<svg class="note-ico-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>' +
-          '<svg class="note-ico-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14"/><path d="M16 5v14"/></svg>' +
-        '</button>' +
-        '<div class="note-main">' +
-          '<div class="note-top"><span class="note-num">Nota ' + (idx + 1) + '</span>' +
-            '<span class="note-state">' + (listened ? "Selesai didengar" : "Belum didengar") + '</span></div>' +
-          '<h4>' + esc(note.title) + '</h4>' +
-          '<p class="note-summary">' + esc(note.summary) + '</p>' +
-          '<div class="note-track">' +
-            '<div class="note-bar" role="progressbar" aria-label="Kemajuan audio nota ' + (idx + 1) + '" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + (listened ? 100 : 0) + '">' +
-              '<span class="note-fill" style="width:' + (listened ? 100 : 0) + '%"></span>' +
+      return '<section class="note-block' + (listened ? " is-done" : "") + '" data-note="' + idx + '">' +
+        '<div class="note-audio">' +
+          '<button type="button" class="note-play" data-play-note="' + idx + '" aria-label="Mainkan nota ' + (idx + 1) + ': ' + esc(note.title) + '" title="Dengar nota">' +
+            '<svg class="note-ico-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>' +
+            '<svg class="note-ico-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14"/><path d="M16 5v14"/></svg>' +
+          '</button>' +
+          '<div class="note-audio-main">' +
+            '<div class="note-audio-top">' +
+              '<span class="note-num">Nota ' + (idx + 1) + '</span>' +
+              '<h4>' + esc(note.title) + '</h4>' +
+              '<span class="note-state">' + (listened ? "Selesai didengar" : "Belum didengar") + '</span>' +
             '</div>' +
-            '<span class="note-time">' + (listened ? "Selesai" : "0:00") + "</span>" +
+            '<div class="note-track">' +
+              '<div class="note-bar" role="progressbar" aria-label="Kemajuan audio nota ' + (idx + 1) + '" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + (listened ? 100 : 0) + '">' +
+                '<span class="note-fill" style="width:' + (listened ? 100 : 0) + '%"></span>' +
+              '</div>' +
+              '<span class="note-time">' + (listened ? "Selesai" : "0:00") + "</span>" +
+            '</div>' +
           '</div>' +
-        '</div>' +
-        '<span class="note-check" aria-hidden="true">' + SVG.check + "</span>" +
-      "</article>";
+          '<span class="note-check" aria-hidden="true">' + SVG.check + "</span>" +
+        "</div>" +
+        '<div class="note-content">' + (content[idx] || "") + "</div>" +
+      "</section>";
     }).join("");
 
-    return '<section class="notes-card" id="notesCard" data-topic="' + num + '">' +
-      '<div class="notes-head">' +
-        '<div class="notes-title">' +
-          '<span class="notes-kicker">Nota bersuara • Suara AI</span>' +
-          "<h3>Dengar setiap nota</h3>" +
-          "<p>Tekan setiap nota dan dengar sehingga selesai. Semua nota perlu didengar sebelum anda meneruskan.</p>" +
-        "</div>" +
-        '<div class="notes-summary">' +
-          '<div class="notes-count"><strong id="notesCount">' + done + " / " + notes.length + "</strong><span>nota didengar</span></div>" +
-          '<div class="notes-progress"><span id="notesBar" style="width:' + pct + '%"></span></div>' +
-          '<button type="button" class="notes-speed" id="notesSpeed" aria-label="Tukar kelajuan main balik">' + ttsSpeedLabel() + "</button>" +
+    return '<div class="notes-wrap" id="notesCard" data-topic="' + num + '">' +
+      '<div class="notes-head-card">' +
+        '<div class="notes-head">' +
+          '<div class="notes-title">' +
+            '<span class="notes-kicker">Nota bersuara • Suara AI</span>' +
+            "<h3>Dengar setiap nota</h3>" +
+            "<p>Tekan butang audio pada setiap nota, kemudian dengar sehingga selesai. Semua nota perlu didengar sebelum anda meneruskan.</p>" +
+          "</div>" +
+          '<div class="notes-summary">' +
+            '<div class="notes-count"><strong id="notesCount">' + done + " / " + notes.length + "</strong><span>nota didengar</span></div>" +
+            '<div class="notes-progress"><span id="notesBar" style="width:' + pct + '%"></span></div>' +
+            '<button type="button" class="notes-speed" id="notesSpeed" aria-label="Tukar kelajuan main balik">' + ttsSpeedLabel() + "</button>" +
+          "</div>" +
         "</div>" +
       "</div>" +
-      '<div class="note-list">' + items + "</div>" +
-    "</section>";
+      items +
+    "</div>";
   }
 
   function stopNotesAudio() {
@@ -458,7 +465,7 @@
   }
 
   function updateNoteCard(num, idx) {
-    const card = document.querySelector('#notesCard .note-item[data-note="' + idx + '"]');
+    const card = document.querySelector('#notesCard .note-block[data-note="' + idx + '"]');
     if (!card) return;
     const listened = isNoteListened(num, idx);
     const active = notesPlayer.topic === num && notesPlayer.index === idx;
@@ -485,12 +492,19 @@
         stateEl.textContent = "Belum didengar";
       }
     }
-    if (fill && !playing && !(active && notesPlayer.fallback)) {
-      fill.style.width = listened ? "100%" : "0%";
+    if (fill) {
+      if (listened && !playing) {
+        fill.style.width = "100%";
+      } else if (!active && !playing) {
+        fill.style.width = "0%";
+      }
     }
-    if (bar) bar.setAttribute("aria-valuenow", listened ? "100" : "0");
-    if (timeEl && !playing && !active) {
-      timeEl.textContent = listened ? "Selesai" : "0:00";
+    if (bar && !active && !playing) {
+      bar.setAttribute("aria-valuenow", listened ? "100" : "0");
+    }
+    if (timeEl && !playing) {
+      if (listened) timeEl.textContent = "Selesai";
+      else if (!active) timeEl.textContent = "0:00";
     }
   }
 
@@ -564,7 +578,7 @@
     if (!panel) return;
 
     function activeCard(idx) {
-      return panel.querySelector('.note-item[data-note="' + idx + '"]');
+      return panel.querySelector('.note-block[data-note="' + idx + '"]');
     }
 
     function paintPlaying(idx, playing) {
@@ -599,7 +613,7 @@
         notesPlayer.utterance = null;
         notesPlayer.index = idx;
         notesPlayer.fallback = false;
-        panel.querySelectorAll(".note-item").forEach(function (card, i) {
+        panel.querySelectorAll(".note-block").forEach(function (card, i) {
           if (i === idx) {
             card.classList.add("is-active");
             return;
@@ -630,6 +644,10 @@
       if (notesPlayer.fallback) {
         speakNote(idx);
         return;
+      }
+
+      if (same && audio.ended) {
+        try { audio.currentTime = 0; } catch (e) { /* abaikan */ }
       }
 
       const promise = audio.play();
@@ -743,7 +761,6 @@
       if (idx === null) return;
       paintPlaying(idx, false);
       markNoteListened(num, idx);
-      try { audio.currentTime = 0; } catch (e) { /* abaikan */ }
       const card = activeCard(idx);
       if (card) {
         card.classList.remove("is-playing", "is-active");
@@ -1191,8 +1208,7 @@
           '<div class="hero-steps" aria-hidden="true">' + heroDots + "</div>" +
         "</header>" +
         '<div class="topic-body">' +
-          notesPanelMarkup(num) +
-          topic.html +
+          notesPanelMarkup(num, topic.html.split("<!--NOTA-->")) +
           '<div class="lesson-actions">' +
             "<div><strong>" + (done ? "Topik ini telah selesai." : "Sudah faham?") + "</strong>" +
               '<p class="note" id="lessonNote">' + (done
