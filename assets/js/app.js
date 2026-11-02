@@ -11,6 +11,8 @@
   const CFG = window.LMS_CONFIG || {};
   const STORAGE_KEY = "lms_maruah_v1";
   const API_STORAGE_KEY = "lms_maruah_api";
+  const SOUND_KEY = "lms_maruah_sound";
+  const TTS_SPEED_KEY = "lms_maruah_tts_speed";
   const PASS_MARK = 80;
 
   const STEPS = [
@@ -59,6 +61,9 @@
   let drafts = {};
   let results = {};
   let savingPromise = null;
+  let soundEnabled = readSoundPreference();
+  let ttsSpeed = readTtsSpeed();
+  const ttsState = { audio: null, topic: null, speech: null };
 
   const els = {};
 
@@ -252,6 +257,337 @@
     return base.slice(0, 60) || "Murid";
   }
 
+  function readSoundPreference() {
+    try { return localStorage.getItem(SOUND_KEY) !== "off"; } catch (e) { return true; }
+  }
+
+  function readTtsSpeed() {
+    try {
+      const n = parseFloat(localStorage.getItem(TTS_SPEED_KEY));
+      return [0.75, 1, 1.25, 1.5].indexOf(n) !== -1 ? n : 1;
+    } catch (e) {
+      return 1;
+    }
+  }
+
+  /* ============================ BUNYI KESAN ============================ */
+
+  const SFX = {
+    ctx: null,
+    ensure: function () {
+      if (!soundEnabled) return null;
+      try {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return null;
+        if (!this.ctx) this.ctx = new AC();
+        if (this.ctx.state === "suspended") this.ctx.resume();
+        return this.ctx;
+      } catch (e) {
+        return null;
+      }
+    },
+    tone: function (freq, delay, duration, type, volume) {
+      const ctx = this.ensure();
+      if (!ctx) return;
+      try {
+        const start = ctx.currentTime + delay;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type || "sine";
+        osc.frequency.setValueAtTime(freq, start);
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.exponentialRampToValueAtTime(volume || 0.05, start + 0.012);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(start);
+        osc.stop(start + duration + 0.03);
+      } catch (e) { /* bunyi tidak disokong */ }
+    },
+    tick: function () {
+      this.tone(880, 0, 0.045, "sine", 0.018);
+    },
+    click: function () {
+      this.tone(620, 0, 0.055, "sine", 0.025);
+    },
+    correct: function () {
+      this.tone(523.25, 0, 0.22, "triangle", 0.055);
+      this.tone(659.25, 0.08, 0.24, "triangle", 0.05);
+      this.tone(783.99, 0.16, 0.3, "triangle", 0.045);
+    },
+    wrong: function () {
+      this.tone(277.18, 0, 0.18, "sine", 0.04);
+      this.tone(207.65, 0.13, 0.26, "sine", 0.035);
+    },
+    complete: function () {
+      this.tone(523.25, 0, 0.2, "sine", 0.05);
+      this.tone(659.25, 0.09, 0.2, "sine", 0.05);
+      this.tone(783.99, 0.18, 0.28, "sine", 0.05);
+      this.tone(1046.5, 0.29, 0.4, "sine", 0.04);
+    }
+  };
+
+  function updateSoundToggle() {
+    const btn = els.soundToggle;
+    if (!btn) return;
+    btn.setAttribute("aria-pressed", soundEnabled ? "true" : "false");
+    btn.classList.toggle("is-muted", !soundEnabled);
+    btn.title = soundEnabled ? "Matikan bunyi kesan" : "Hidupkan bunyi kesan";
+    btn.innerHTML = soundEnabled
+      ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5L6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>'
+      : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5L6 9H3v6h3l5 4z"/><path d="M16 9l5 6"/><path d="M21 9l-5 6"/></svg>';
+  }
+
+  function toggleSound() {
+    soundEnabled = !soundEnabled;
+    try { localStorage.setItem(SOUND_KEY, soundEnabled ? "on" : "off"); } catch (e) { /* abaikan */ }
+    updateSoundToggle();
+    if (soundEnabled) {
+      SFX.click();
+      toast("Bunyi kesan dihidupkan.");
+    } else {
+      toast("Bunyi kesan dimatikan.");
+    }
+  }
+
+  /* ============================ NOTA BERSUARA ============================ */
+
+  function ttsSpeedLabel() {
+    return String(ttsSpeed).replace(/\.0$/, "") + "×";
+  }
+
+  function formatClock(seconds) {
+    if (!isFinite(seconds) || seconds < 0) return "0:00";
+    const total = Math.floor(seconds);
+    const m = Math.floor(total / 60);
+    const s = total % 60;
+    return m + ":" + (s < 10 ? "0" : "") + s;
+  }
+
+  function ttsSource(num) {
+    return "assets/audio/topik-" + num + ".mp3";
+  }
+
+  function ttsPanelMarkup(num) {
+    return '<div class="tts-card" id="ttsCard" data-topic="' + num + '">' +
+      '<div class="tts-head">' +
+        '<div class="tts-icon" aria-hidden="true">' +
+          '<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6"/><path d="M18.5 6.5a8 8 0 0 1 0 11"/></svg>' +
+        '</div>' +
+        '<div class="tts-copy">' +
+          '<span class="tts-kicker">Nota bersuara • Suara AI</span>' +
+          '<strong>Dengar nota Topik ' + num + '</strong>' +
+          '<p id="ttsStatus">Ketik butang main untuk mendengar nota ini.</p>' +
+        '</div>' +
+        '<div class="tts-controls">' +
+          '<button type="button" class="tts-speed" id="ttsSpeedBtn" aria-label="Tukar kelajuan main balik">' + ttsSpeedLabel() + '</button>' +
+          '<button type="button" class="tts-play" id="ttsPlay" aria-label="Mainkan nota bersuara">' +
+            '<svg class="tts-ico-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>' +
+            '<svg class="tts-ico-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14"/><path d="M16 5v14"/></svg>' +
+          '</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="tts-track">' +
+        '<input class="tts-seek" id="ttsSeek" type="range" min="0" max="1000" value="0" step="1" disabled aria-label="Kedudukan audio">' +
+        '<span class="tts-time" id="ttsTime">0:00 / --:--</span>' +
+      '</div>' +
+      '<div class="tts-wave" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>' +
+    '</div>';
+  }
+
+  function stopTts() {
+    if (ttsState.audio) {
+      try {
+        ttsState.audio.pause();
+        ttsState.audio.currentTime = 0;
+      } catch (e) { /* abaikan */ }
+      ttsState.audio = null;
+    }
+    if (window.speechSynthesis) {
+      try { window.speechSynthesis.cancel(); } catch (e) { /* abaikan */ }
+    }
+    ttsState.topic = null;
+    ttsState.speech = null;
+  }
+
+  function cycleTtsSpeed() {
+    const speeds = [1, 1.25, 1.5, 0.75];
+    const idx = speeds.indexOf(ttsSpeed);
+    ttsSpeed = speeds[(idx + 1) % speeds.length];
+    try { localStorage.setItem(TTS_SPEED_KEY, String(ttsSpeed)); } catch (e) { /* abaikan */ }
+    const btn = $("ttsSpeedBtn");
+    if (btn) btn.textContent = ttsSpeedLabel();
+    if (ttsState.audio) ttsState.audio.playbackRate = ttsSpeed;
+    SFX.click();
+  }
+
+  function bindTts(num) {
+    stopTts();
+    const topic = TOPICS[num];
+    const audio = new Audio(ttsSource(num));
+    audio.preload = "metadata";
+    audio.playbackRate = ttsSpeed;
+    ttsState.audio = audio;
+    ttsState.topic = num;
+
+    const playBtn = $("ttsPlay");
+    const seek = $("ttsSeek");
+    const timeEl = $("ttsTime");
+    const statusEl = $("ttsStatus");
+    const speedBtn = $("ttsSpeedBtn");
+    const wave = document.querySelector("#ttsCard .tts-wave");
+    if (!playBtn || !statusEl) return;
+
+    let fallback = false;
+    let speaking = false;
+
+    function paint(playing) {
+      if (playBtn.isConnected) {
+        playBtn.classList.toggle("is-playing", playing);
+        playBtn.setAttribute("aria-label", playing ? "Jeda nota bersuara" : "Mainkan nota bersuara");
+      }
+      if (wave) wave.classList.toggle("is-active", playing);
+    }
+
+    function setStatus(text) {
+      if (statusEl.isConnected) statusEl.textContent = text;
+    }
+
+    function finish() {
+      paint(false);
+      speakDone();
+    }
+
+    function speakDone() {
+      speaking = false;
+      if (ttsState.speech === "current") ttsState.speech = null;
+    }
+
+    function speak() {
+      if (!window.speechSynthesis) {
+        toast("Pelayar ini tidak menyokong suara. Sila guna pelayar terkini.", "error");
+        return;
+      }
+      if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+        window.speechSynthesis.pause();
+        paint(false);
+        setStatus("Suara pelayar dijeda.");
+        return;
+      }
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+        paint(true);
+        setStatus("Sedang dimainkan dengan suara pelayar.");
+        return;
+      }
+      const text = topic.narration || topic.title;
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "ms-MY";
+      utterance.rate = ttsSpeed;
+      utterance.pitch = 1;
+      try {
+        const voices = window.speechSynthesis.getVoices();
+        const voice = voices.find(function (v) { return /^ms/i.test(v.lang); }) ||
+          voices.find(function (v) { return /^id/i.test(v.lang); });
+        if (voice) utterance.voice = voice;
+      } catch (e) { /* guna suara lalai */ }
+      utterance.onstart = function () {
+        ttsState.speech = "current";
+        paint(true);
+        setStatus("Sedang dimainkan dengan suara pelayar.");
+      };
+      utterance.onend = function () {
+        speakDone();
+        paint(false);
+        setStatus("Tamat. Ketik untuk mendengar semula.");
+      };
+      utterance.onerror = function () {
+        speakDone();
+        paint(false);
+        setStatus("Suara pelayar tidak dapat dimainkan.");
+      };
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function enableFallback() {
+      if (fallback) return;
+      fallback = true;
+      if (seek) seek.disabled = true;
+      if (timeEl) timeEl.textContent = "Suara pelayar";
+      setStatus("Audio AI tidak tersedia — ketik butang untuk guna suara pelayar.");
+    }
+
+    audio.addEventListener("loadedmetadata", function () {
+      if (!seek) return;
+      seek.disabled = false;
+      seek.max = 1000;
+      if (timeEl) {
+        timeEl.textContent = "0:00 / " + formatClock(audio.duration);
+      }
+    });
+
+    audio.addEventListener("timeupdate", function () {
+      if (!seek || !timeEl || !audio.duration) return;
+      seek.value = String(Math.round((audio.currentTime / audio.duration) * 1000));
+      timeEl.textContent = formatClock(audio.currentTime) + " / " + formatClock(audio.duration);
+    });
+
+    audio.addEventListener("play", function () {
+      paint(true);
+      setStatus("Sedang dimainkan. Ketik untuk menjeda.");
+    });
+
+    audio.addEventListener("pause", function () {
+      if (!audio.ended) {
+        paint(false);
+        setStatus("Dijeda. Ketik untuk meneruskan.");
+      }
+    });
+
+    audio.addEventListener("ended", function () {
+      paint(false);
+      setStatus("Tamat. Ketik untuk mendengar semula.");
+      try { audio.currentTime = 0; } catch (e) { /* abaikan */ }
+      if (seek) seek.value = "0";
+      if (timeEl) timeEl.textContent = "0:00 / " + formatClock(audio.duration || 0);
+    });
+
+    audio.addEventListener("error", enableFallback);
+
+    playBtn.addEventListener("click", function () {
+      SFX.click();
+      if (fallback) {
+        speak();
+        return;
+      }
+      if (audio.paused) {
+        audio.play().catch(function () {
+          enableFallback();
+        });
+      } else {
+        audio.pause();
+      }
+    });
+
+    if (seek) {
+      seek.addEventListener("input", function () {
+        if (audio.duration) {
+          audio.currentTime = (Number(seek.value) / 1000) * audio.duration;
+        }
+      });
+    }
+
+    if (speedBtn) {
+      speedBtn.textContent = ttsSpeedLabel();
+      speedBtn.addEventListener("click", cycleTtsSpeed);
+    }
+
+    audio.load();
+
+    window.__lmsTts = { audio: audio, get fallback() { return fallback; } };
+  }
+
   /* ============================ API ============================ */
 
   function hasScriptBridge() {
@@ -405,8 +741,10 @@
     els.studentChipName = $("studentChipName");
     els.studentChipClass = $("studentChipClass");
     els.feedbackShortcut = $("feedbackShortcut");
+    els.soundToggle = $("soundToggle");
     els.toast = $("toast");
 
+    updateSoundToggle();
     bindGlobalEvents();
     renderCoverState();
   }
@@ -442,6 +780,10 @@
       }
       navigate("sijil");
     });
+
+    if (els.soundToggle) {
+      els.soundToggle.addEventListener("click", toggleSound);
+    }
 
     els.stepNav.addEventListener("click", function (e) {
       const btn = e.target.closest("[data-step]");
@@ -482,6 +824,7 @@
   }
 
   function showCover() {
+    stopTts();
     els.app.hidden = true;
     els.cover.hidden = false;
     renderCoverState();
@@ -504,6 +847,7 @@
       return;
     }
 
+    SFX.click();
     state = freshState();
     state.name = name;
     state.className = className;
@@ -532,6 +876,7 @@
   }
 
   function clearProgress() {
+    stopTts();
     state = freshState();
     drafts = {};
     results = {};
@@ -589,6 +934,7 @@
       toast("Selesaikan langkah sebelumnya dahulu untuk membuka bahagian ini.");
       return;
     }
+    stopTts();
     currentStep = id;
     state.lastStep = id;
     saveState();
@@ -628,6 +974,7 @@
           '<div class="hero-steps" aria-hidden="true">' + heroDots + "</div>" +
         "</header>" +
         '<div class="topic-body">' +
+          ttsPanelMarkup(num) +
           topic.html +
           '<div class="lesson-actions">' +
             "<div><strong>" + (done ? "Topik ini telah selesai." : "Sudah faham?") + "</strong>" +
@@ -646,11 +993,14 @@
         state.completedTopics.push(num);
         state.completedTopics.sort(function (a, b) { return a - b; });
         saveState();
+        SFX.complete();
         toast("Topik " + num + " selesai. Kuiz " + num + " telah dibuka.");
         refreshChrome();
       }
       navigate("kuiz" + num);
     });
+
+    bindTts(num);
   }
 
   /* ============================ KUIZ: DRAF ============================ */
@@ -934,6 +1284,7 @@
     if (q.type === "blank") {
       els.content.querySelectorAll("[data-opt]").forEach(function (btn) {
         btn.addEventListener("click", function () {
+          SFX.tick();
           d.answer = btn.getAttribute("data-opt");
           const chosen = q.options.find(function (o) { return o.id === d.answer; });
           const pair = chosen.text.split(" / ");
@@ -952,6 +1303,7 @@
     if (q.type === "tf") {
       els.content.querySelectorAll("[data-tf]").forEach(function (btn) {
         btn.addEventListener("click", function () {
+          SFX.tick();
           const idx = Number(btn.getAttribute("data-tf"));
           d.answers[idx] = btn.getAttribute("data-val") === "true";
           els.content.querySelectorAll('[data-tf="' + idx + '"]').forEach(function (b) {
@@ -977,6 +1329,7 @@
   function bindMcqChoices(num, answers) {
     els.content.querySelectorAll("[data-mcq]").forEach(function (btn) {
       btn.addEventListener("click", function () {
+        SFX.tick();
         const qi = Number(btn.getAttribute("data-mcq"));
         answers[qi] = btn.getAttribute("data-val");
         els.content.querySelectorAll('[data-mcq="' + qi + '"]').forEach(function (b) {
@@ -1044,6 +1397,7 @@
       e.preventDefault();
       const itemId = e.dataTransfer.getData("text/plain");
       if (!itemId) return;
+      SFX.tick();
       d.assign[itemId] = zone.getAttribute("data-cat");
       d.selectedItem = null;
       renderDragBoard(num);
@@ -1057,9 +1411,11 @@
         e.stopPropagation();
         const itemId = chip.getAttribute("data-item");
         if (chip.getAttribute("draggable") === "true") {
+          SFX.tick();
           d.selectedItem = d.selectedItem === itemId ? null : itemId;
           renderDragBoard(num);
         } else {
+          SFX.tick();
           delete d.assign[itemId];
           d.selectedItem = null;
           renderDragBoard(num);
@@ -1068,6 +1424,7 @@
       }
 
       if (zone && d.selectedItem) {
+        SFX.tick();
         d.assign[d.selectedItem] = zone.getAttribute("data-cat");
         d.selectedItem = null;
         renderDragBoard(num);
@@ -1200,6 +1557,7 @@
     renderQuiz(num);
 
     if (passedNow) {
+      SFX.correct();
       celebrate();
       if (allQuizzesPassed()) {
         ensureCertificate();
@@ -1209,8 +1567,10 @@
         toast("Syabas! Anda lulus Kuiz " + num + " dengan skor " + pct + "%.");
       }
     } else if (state.quizzes[num].passed) {
+      SFX.wrong();
       toast("Percubaan ini " + pct + "%. Skor terbaik " + newBest + "% kekal dan anda masih lulus.");
     } else {
+      SFX.wrong();
       toast("Skor " + pct + "%. Perlu sekurang-kurangnya " + q.passMark + "% untuk lulus. Cuba lagi!", "error");
     }
   }

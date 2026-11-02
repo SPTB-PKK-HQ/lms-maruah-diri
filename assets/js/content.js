@@ -16,6 +16,21 @@ window.LMS_CONTENT = {
       title: "Maksud Menjaga Maruah Diri",
       subtitle: "Mengenali cermin kehormatan diri",
       minutes: 8,
+      narration: `Topik satu. Maksud menjaga maruah diri.
+
+Bayangkan maruah seperti sekeping cermin. Apabila ia bersih, wajah kita kelihatan indah. Apabila ia retak atau dicemar, pandangan menjadi kabur dan sukar dipercayai semula. Begitulah maruah diri. Ia menjadi cermin kepada iman, akhlak dan harga diri kita.
+
+Menjaga maruah diri ialah usaha memelihara diri daripada melakukan larangan Allah Subhanahu wa Taala, serta mengelakkan segala perkara yang boleh mencemarkan kehormatan diri, keluarga dan masyarakat.
+
+Terdapat empat benteng maruah. Pertama, hati. Iman dan takwa menjadi akar yang mengawal keinginan. Hati yang hidup akan malu melakukan dosa. Kedua, lisan. Tutur kata yang sopan, jujur dan tidak mengumpat mencerminkan kehormatan seseorang. Ketiga, tingkah laku. Perbuatan yang menghormati batas pergaulan, ibu bapa, guru dan rakan sebaya. Keempat, penampilan. Pakaian yang menutup aurat, kemas dan tidak mencolok mata akan melindungi diri.
+
+Cermin maruah perlu dijaga setiap hari. Di rumah, bercakap hormat dengan ibu bapa dan membantu kerja rumah. Di sekolah, tidak meniru dalam ujian, menghormati guru dan menjaga adab di dalam kelas. Dalam talian, tidak menyebarkan fitnah dan tidak menulis komen yang menyakiti hati orang. Di tempat awam, menjaga aurat, kelakuan dan percakapan.
+
+Allah Subhanahu wa Taala berfirman dalam Surah Al-Isra, ayat tujuh puluh, yang bermaksud: Dan sesungguhnya Kami telah memuliakan anak-anak Adam, serta Kami angkut mereka di darat dan di laut, dan Kami berikan mereka rezeki yang baik-baik, dan Kami lebihkan mereka dengan kelebihan yang sempurna atas kebanyakan makhluk yang telah Kami ciptakan.
+
+Renung sejenak. Adakah percakapan saya hari ini menyenangkan orang lain? Adakah saya menjaga aurat dan penampilan dengan baik? Apakah satu tindakan kecil yang boleh saya lakukan untuk menjaga maruah diri esok?
+
+Ingat, maruah bukan untuk ditunjuk-tunjuk, tetapi untuk dipelihara. Ia mahal nilainya dan sukar dibina semula apabila sudah tercemar.`,
       html: `
         <p class="lead">Bayangkan maruah seperti sekeping <strong>cermin</strong>. Apabila ia bersih, wajah kita kelihatan indah. Apabila ia retak atau dicemar, pandangan menjadi kabur dan sukar dipercayai semula. Begitulah maruah diri — ia menjadi cermin kepada iman, akhlak dan harga diri kita.</p>
 
@@ -83,6 +98,25 @@ window.LMS_CONTENT = {
       title: "Kewajipan Menjaga Maruah Diri",
       subtitle: "Dalil dan tanggungjawab seorang mukmin",
       minutes: 9,
+      narration: `Topik dua. Kewajipan menjaga maruah diri.
+
+Menjaga maruah bukan pilihan sampingan, tetapi kewajipan yang dituntut oleh Islam. Allah Subhanahu wa Taala menyukai perkara yang mulia dan membenci perkara yang keji. Setiap mukmin bertanggungjawab menjaga kehormatan dirinya, keluarganya dan masyarakat.
+
+Firman Allah dalam Surah Al-A'raf, ayat seratus lima puluh tujuh, yang bermaksud: dan menghalalkan bagi mereka segala yang baik, serta mengharamkan bagi mereka segala yang buruk.
+
+Segala yang baik membina maruah. Segala yang keji merosakkannya. Islam mengajar kita memilih yang mulia walaupun sukar, dan menjauhi yang hina walaupun ia kelihatan menyeronokkan.
+
+Terdapat tiga tanggungjawab. Pertama, maruah diri sendiri. Kita menjauhi dosa, menjaga akhlak dan berusaha menjadi insan yang berilmu serta beriman. Kita tidak merendahkan diri dengan perbuatan yang memalukan.
+
+Kedua, maruah keluarga. Kelakuan kita mencerminkan didikan keluarga. Menjaga adab membawa nama baik keluarga, manakala perbuatan buruk mencemarkan nama mereka.
+
+Ketiga, maruah masyarakat dan ummah. Masyarakat yang menjaga maruah akan hidup aman, saling mempercayai dan bebas daripada gejala sosial.
+
+Bayangkan situasi ini. Ketika ujian, Aiman diminta meniru jawapan rakannya. Dia teringat pesan gurunya, markah boleh dikejar semula, tetapi maruah yang tercalar lebih sukar dipulihkan. Aiman menolak dengan sopan dan belajar bersungguh-sungguh. Walaupun markahnya sederhana, dia bangga kerana menjaga kejujuran.
+
+Maruah bukan sombong. Menjaga maruah bermaksud yakin dengan kemampuan diri, menolak ajakan buruk dengan sopan, menghormati orang lain, dan berpakaian kemas serta menutup aurat. Sebaliknya, takbur dan bangga diri bermaksud memandang rendah orang lain, menunjuk-nunjuk kekayaan atau kecantikan, enggan mendengar nasihat, dan mementingkan diri sendiri.
+
+Komitmen peribadi. Saya menjaga maruah diri kerana saya hamba Allah, kerana saya sayangkan keluarga, dan kerana saya mahu dipercayai orang lain.`,
       html: `
         <p class="lead">Menjaga maruah bukan pilihan sampingan, tetapi <strong>kewajipan</strong> yang dituntut oleh Islam. Allah SWT menyukai perkara yang mulia dan membenci perkara yang keji. Justeru, setiap mukmin bertanggungjawab menjaga kehormatan dirinya, keluarganya dan masyarakat.</p>
 
@@ -163,6 +197,21 @@ window.LMS_CONTENT = {
       title: "Cara Menjaga Maruah Diri",
       subtitle: "Pakaian, percakapan dan tingkah laku",
       minutes: 12,
+      narration: `Topik tiga. Cara menjaga maruah diri.
+
+Maruah dibina melalui tiga pintu utama: apa yang kita pakai, apa yang kita ucapkan, dan bagaimana kita bertindak. Apabila ketiga-tiganya selari dengan ajaran Islam, maruah kita terpelihara.
+
+Panduan berpakaian. Pakaian yang baik melindungi, bukan menarik perhatian yang salah. Pertama, menutup aurat mengikut syariat Islam dengan sempurna. Kedua, kemas dan bersih. Pakaian tidak kusut, tidak berbau dan sesuai dengan tempat. Ketiga, tidak mencolok mata. Tidak terlalu ketat, nipis, terdedah atau berlebihan. Keempat, tidak menyerupai pakaian jantina yang berbeza, atau meniru gaya yang bercanggah dengan adab Islam.
+
+Panduan bercakap. Lidah yang dijaga mencerminkan hati yang bersih. Bersopan santun dan menggunakan bahasa yang mudah difahami. Bermanis muka serta mengucapkan salam ketika bertemu. Tidak mengumpat, mengadu domba atau menyebarkan berita palsu. Menepati janji dan meminta maaf apabila tersilap kata.
+
+Panduan tingkah laku. Adab yang baik menjadikan kita dihormati tanpa perlu meninggi diri. Menjaga batas pergaulan antara lelaki dan perempuan dengan cara yang beradab. Menolong orang yang memerlukan tanpa mengharapkan balasan. Meminta izin sambil menundukkan badan apabila melalui di hadapan orang yang lebih tua. Menghormati guru, ibu bapa dan rakan, serta menjauhi perbuatan buli.
+
+Nabi Muhammad Sallallahu Alaihi Wasallam bersabda, sesungguhnya Allah itu indah dan Dia menyukai keindahan. Hadis ini mengajar kita bahawa penampilan dan akhlak yang indah adalah sebahagian daripada iman.
+
+Tip media sosial. Sebelum memuat naik gambar atau menulis komen, tanya diri, adakah ini menjaga maruah saya, keluarga dan orang lain? Jika ragu-ragu, jangan kongsi.
+
+Rumus mudah. Pakaian menutup, percakapan menyejukkan, perlakuan menghormati. Itulah cermin maruah yang bersinar.`,
       html: `
         <p class="lead">Maruah dibina melalui tiga pintu utama: <strong>apa yang kita pakai</strong>, <strong>apa yang kita ucapkan</strong>, dan <strong>bagaimana kita bertindak</strong>. Apabila ketiga-tiganya selari dengan ajaran Islam, maruah kita terpelihara.</p>
 
@@ -244,6 +293,21 @@ window.LMS_CONTENT = {
       title: "Akibat dan Hikmah",
       subtitle: "Buah manis menjaga maruah, buah pahit mengabaikannya",
       minutes: 9,
+      narration: `Topik empat. Akibat dan hikmah.
+
+Setiap pilihan ada akibatnya. Menjaga maruah membuahkan ketenangan dan keberkatan, manakala mengabaikannya mengundang kegelisahan dan kerugian.
+
+Apabila maruah dijaga, kita disayangi Allah Subhanahu wa Taala dan dihormati manusia. Hati menjadi tenang serta jauh daripada rasa bersalah. Kita mendapat kepercayaan ibu bapa, guru dan rakan. Masyarakat hidup aman, bersatu dan sejahtera. Kita juga menjadi teladan yang baik kepada generasi muda.
+
+Apabila maruah diabaikan, kita mendapat dosa dan jauh daripada rahmat Allah. Hati menjadi gelisah, malu dan hilang keyakinan diri. Kepercayaan keluarga dan masyarakat terhakis. Nama keluarga tercemar dan hubungan terputus. Perbuatan itu juga boleh menjerumuskan seseorang kepada gejala sosial dan jenayah.
+
+Dengar pantun dikir barat ini. Maruah diri jangan dicemar, budi bahasa dijaga selalu. Hidup aman kekal sejahtera, masyarakat maju bersatu padu. Apabila budi bahasa dijaga dalam tutur kata, keamanan akan berkekalan dan semua pihak hidup sejahtera.
+
+Maruah yang dijaga membuka pintu kepercayaan dan keberkatan. Maruah yang diabaikan menutup pintu rahmat dan meninggalkan penyesalan. Pilihan ada di tangan kita setiap hari, dalam cara berpakaian, bercakap dan bertindak.
+
+Muhasabah. Apakah satu tabiat baik yang ingin saya kekalkan selepas modul ini? Tuliskan niat itu dan mula melakukannya hari ini.
+
+Maruah diri ialah cermin peribadi. Jika kita menjaganya, dunia melihat keindahan akhlak kita. Jika kita mengabaikannya, yang terpantul hanyalah penyesalan.`,
       html: `
         <p class="lead">Setiap pilihan ada akibatnya. Menjaga maruah membuahkan ketenangan dan keberkatan, manakala mengabaikannya mengundang kegelisahan dan kerugian. Mari kita lihat kedua-dua sisi cermin ini.</p>
 
