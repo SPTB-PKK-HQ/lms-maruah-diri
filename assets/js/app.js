@@ -182,7 +182,9 @@
     const idx = stepIndex(id);
     if (idx <= 0) return true;
     const prev = STEPS[idx - 1];
-    if (prev.kind === "topic") return state.completedTopics.indexOf(prev.num) !== -1;
+    if (prev.kind === "topic") {
+      return state.completedTopics.indexOf(prev.num) !== -1 && allNotesListened(prev.num);
+    }
     if (prev.kind === "quiz") return isQuizPassed(prev.num);
     return true;
   }
