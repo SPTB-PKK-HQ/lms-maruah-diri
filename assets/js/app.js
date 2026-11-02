@@ -63,7 +63,7 @@
   let savingPromise = null;
   let soundEnabled = readSoundPreference();
   let ttsSpeed = readTtsSpeed();
-  const ttsState = { audio: null, topic: null, speech: null };
+  const notesPlayer = { audio: null, topic: null, index: null, fallback: false, utterance: null };
 
   const els = {};
 
@@ -86,6 +86,7 @@
       className: "",
       startedAt: null,
       completedTopics: [],
+      listenedNotes: {},
       quizzes: {},
       certificate: null,
       resultId: null,
@@ -105,6 +106,7 @@
       const base = freshState();
       const merged = Object.assign(base, parsed);
       merged.completedTopics = Array.isArray(merged.completedTopics) ? merged.completedTopics.filter(function (n) { return n >= 1 && n <= 4; }) : [];
+      merged.listenedNotes = merged.listenedNotes && typeof merged.listenedNotes === "object" ? merged.listenedNotes : {};
       merged.quizzes = merged.quizzes && typeof merged.quizzes === "object" ? merged.quizzes : {};
       return merged;
     } catch (e) {
@@ -364,228 +366,441 @@
     return m + ":" + (s < 10 ? "0" : "") + s;
   }
 
-  function ttsSource(num) {
-    return "assets/audio/topik-" + num + ".mp3";
+  function notesOf(num) {
+    return TOPICS[num] && Array.isArray(TOPICS[num].notes) ? TOPICS[num].notes : [];
   }
 
-  function ttsPanelMarkup(num) {
-    return '<div class="tts-card" id="ttsCard" data-topic="' + num + '">' +
-      '<div class="tts-head">' +
-        '<div class="tts-icon" aria-hidden="true">' +
-          '<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6"/><path d="M18.5 6.5a8 8 0 0 1 0 11"/></svg>' +
-        '</div>' +
-        '<div class="tts-copy">' +
-          '<span class="tts-kicker">Nota bersuara • Suara AI</span>' +
-          '<strong>Dengar nota Topik ' + num + '</strong>' +
-          '<p id="ttsStatus">Ketik butang main untuk mendengar nota ini.</p>' +
-        '</div>' +
-        '<div class="tts-controls">' +
-          '<button type="button" class="tts-speed" id="ttsSpeedBtn" aria-label="Tukar kelajuan main balik">' + ttsSpeedLabel() + '</button>' +
-          '<button type="button" class="tts-play" id="ttsPlay" aria-label="Mainkan nota bersuara">' +
-            '<svg class="tts-ico-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>' +
-            '<svg class="tts-ico-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14"/><path d="M16 5v14"/></svg>' +
-          '</button>' +
-        '</div>' +
-      '</div>' +
-      '<div class="tts-track">' +
-        '<input class="tts-seek" id="ttsSeek" type="range" min="0" max="1000" value="0" step="1" disabled aria-label="Kedudukan audio">' +
-        '<span class="tts-time" id="ttsTime">0:00 / --:--</span>' +
-      '</div>' +
-      '<div class="tts-wave" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>' +
-    '</div>';
+  function noteKey(num, idx) {
+    return num + ":" + idx;
   }
 
-  function stopTts() {
-    if (ttsState.audio) {
+  function isNoteListened(num, idx) {
+    return !!(state.listenedNotes && state.listenedNotes[noteKey(num, idx)]);
+  }
+
+  function listenedNotesCount(num) {
+    return notesOf(num).filter(function (note, idx) {
+      return isNoteListened(num, idx);
+    }).length;
+  }
+
+  function allNotesListened(num) {
+    const notes = notesOf(num);
+    return notes.length > 0 && listenedNotesCount(num) === notes.length;
+  }
+
+  function notesSource(num, idx) {
+    return "assets/audio/topik-" + num + "-nota-" + (idx + 1) + ".mp3";
+  }
+
+  function notesPanelMarkup(num) {
+    const notes = notesOf(num);
+    const done = listenedNotesCount(num);
+    const pct = notes.length ? Math.round((done / notes.length) * 100) : 0;
+    const items = notes.map(function (note, idx) {
+      const listened = isNoteListened(num, idx);
+      return '<article class="note-item' + (listened ? " is-done" : "") + '" data-note="' + idx + '">' +
+        '<button type="button" class="note-play" data-play-note="' + idx + '" aria-label="Mainkan nota ' + (idx + 1) + ': ' + esc(note.title) + '">' +
+          '<svg class="note-ico-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>' +
+          '<svg class="note-ico-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14"/><path d="M16 5v14"/></svg>' +
+        '</button>' +
+        '<div class="note-main">' +
+          '<div class="note-top"><span class="note-num">Nota ' + (idx + 1) + '</span>' +
+            '<span class="note-state">' + (listened ? "Selesai didengar" : "Belum didengar") + '</span></div>' +
+          '<h4>' + esc(note.title) + '</h4>' +
+          '<p class="note-summary">' + esc(note.summary) + '</p>' +
+          '<div class="note-track">' +
+            '<div class="note-bar" role="progressbar" aria-label="Kemajuan audio nota ' + (idx + 1) + '" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + (listened ? 100 : 0) + '">' +
+              '<span class="note-fill" style="width:' + (listened ? 100 : 0) + '%"></span>' +
+            '</div>' +
+            '<span class="note-time">' + (listened ? "Selesai" : "0:00") + "</span>" +
+          '</div>' +
+        '</div>' +
+        '<span class="note-check" aria-hidden="true">' + SVG.check + "</span>" +
+      "</article>";
+    }).join("");
+
+    return '<section class="notes-card" id="notesCard" data-topic="' + num + '">' +
+      '<div class="notes-head">' +
+        '<div class="notes-title">' +
+          '<span class="notes-kicker">Nota bersuara • Suara AI</span>' +
+          "<h3>Dengar setiap nota</h3>" +
+          "<p>Tekan setiap nota dan dengar sehingga selesai. Semua nota perlu didengar sebelum anda meneruskan.</p>" +
+        "</div>" +
+        '<div class="notes-summary">' +
+          '<div class="notes-count"><strong id="notesCount">' + done + " / " + notes.length + "</strong><span>nota didengar</span></div>" +
+          '<div class="notes-progress"><span id="notesBar" style="width:' + pct + '%"></span></div>' +
+          '<button type="button" class="notes-speed" id="notesSpeed" aria-label="Tukar kelajuan main balik">' + ttsSpeedLabel() + "</button>" +
+        "</div>" +
+      "</div>" +
+      '<div class="note-list">' + items + "</div>" +
+    "</section>";
+  }
+
+  function stopNotesAudio() {
+    if (notesPlayer.audio) {
       try {
-        ttsState.audio.pause();
-        ttsState.audio.currentTime = 0;
+        notesPlayer.audio.pause();
+        notesPlayer.audio.removeAttribute("src");
+        notesPlayer.audio.load();
       } catch (e) { /* abaikan */ }
-      ttsState.audio = null;
     }
     if (window.speechSynthesis) {
       try { window.speechSynthesis.cancel(); } catch (e) { /* abaikan */ }
     }
-    ttsState.topic = null;
-    ttsState.speech = null;
+    notesPlayer.audio = null;
+    notesPlayer.topic = null;
+    notesPlayer.index = null;
+    notesPlayer.fallback = false;
+    notesPlayer.utterance = null;
   }
 
-  function cycleTtsSpeed() {
-    const speeds = [1, 1.25, 1.5, 0.75];
-    const idx = speeds.indexOf(ttsSpeed);
-    ttsSpeed = speeds[(idx + 1) % speeds.length];
-    try { localStorage.setItem(TTS_SPEED_KEY, String(ttsSpeed)); } catch (e) { /* abaikan */ }
-    const btn = $("ttsSpeedBtn");
-    if (btn) btn.textContent = ttsSpeedLabel();
-    if (ttsState.audio) ttsState.audio.playbackRate = ttsSpeed;
-    SFX.click();
+  function updateNoteCard(num, idx) {
+    const card = document.querySelector('#notesCard .note-item[data-note="' + idx + '"]');
+    if (!card) return;
+    const listened = isNoteListened(num, idx);
+    const active = notesPlayer.topic === num && notesPlayer.index === idx;
+    const playing = active && notesPlayer.audio && !notesPlayer.audio.paused;
+    const stateEl = card.querySelector(".note-state");
+    const fill = card.querySelector(".note-fill");
+    const bar = card.querySelector(".note-bar");
+    const timeEl = card.querySelector(".note-time");
+
+    card.classList.toggle("is-done", listened);
+    card.classList.toggle("is-active", active);
+    card.classList.toggle("is-playing", !!playing);
+
+    if (stateEl) {
+      if (listened) {
+        stateEl.textContent = "Selesai didengar";
+      } else if (active && notesPlayer.fallback) {
+        stateEl.textContent = "Guna suara pelayar";
+      } else if (playing) {
+        stateEl.textContent = "Sedang dimainkan";
+      } else if (active && notesPlayer.audio && notesPlayer.audio.currentTime > 0) {
+        stateEl.textContent = "Dijeda";
+      } else {
+        stateEl.textContent = "Belum didengar";
+      }
+    }
+    if (fill && !playing && !(active && notesPlayer.fallback)) {
+      fill.style.width = listened ? "100%" : "0%";
+    }
+    if (bar) bar.setAttribute("aria-valuenow", listened ? "100" : "0");
+    if (timeEl && !playing && !active) {
+      timeEl.textContent = listened ? "Selesai" : "0:00";
+    }
   }
 
-  function bindTts(num) {
-    stopTts();
-    const topic = TOPICS[num];
-    const audio = new Audio(ttsSource(num));
+  function updateNotesProgress(num) {
+    const notes = notesOf(num);
+    const done = listenedNotesCount(num);
+    const pct = notes.length ? Math.round((done / notes.length) * 100) : 0;
+    const countEl = $("notesCount");
+    const barEl = $("notesBar");
+    if (countEl) countEl.textContent = done + " / " + notes.length;
+    if (barEl) barEl.style.width = pct + "%";
+    updateTopicGate(num);
+  }
+
+  function markNoteListened(num, idx) {
+    if (isNoteListened(num, idx)) return false;
+    if (!state.listenedNotes) state.listenedNotes = {};
+    state.listenedNotes[noteKey(num, idx)] = true;
+    saveState();
+    updateNoteCard(num, idx);
+    updateNotesProgress(num);
+    if (allNotesListened(num)) {
+      SFX.complete();
+      toast("Semua nota telah didengar. Anda boleh meneruskan.");
+    } else {
+      SFX.correct();
+    }
+    return true;
+  }
+
+  function updateTopicGate(num) {
+    const btn = $("completeTopic");
+    if (!btn) return;
+    const done = state.completedTopics.indexOf(num) !== -1;
+    const all = allNotesListened(num);
+    const count = listenedNotesCount(num);
+    const total = notesOf(num).length;
+    const label = btn.querySelector("span");
+    if (label) {
+      label.textContent = all
+        ? (done ? "Teruskan ke Kuiz " + num : "Saya telah faham — teruskan")
+        : "Dengar semua nota dahulu (" + count + "/" + total + ")";
+    }
+    btn.disabled = !all;
+    btn.setAttribute("aria-disabled", all ? "false" : "true");
+    const noteEl = $("lessonNote");
+    if (noteEl) {
+      if (all) {
+        noteEl.textContent = done
+          ? "Semua nota telah didengar. Anda boleh meneruskan ke kuiz."
+          : "Semua nota telah didengar. Tekan butang untuk membuka Kuiz " + num + ".";
+      } else {
+        noteEl.textContent = "Dengar semua nota bersuara di atas untuk membuka butang ini.";
+      }
+    }
+  }
+
+  function bindNotes(num) {
+    stopNotesAudio();
+    const notes = notesOf(num);
+    const audio = new Audio();
     audio.preload = "metadata";
     audio.playbackRate = ttsSpeed;
-    ttsState.audio = audio;
-    ttsState.topic = num;
+    notesPlayer.audio = audio;
+    notesPlayer.topic = num;
+    notesPlayer.fallback = false;
+    notesPlayer.utterance = null;
 
-    const playBtn = $("ttsPlay");
-    const seek = $("ttsSeek");
-    const timeEl = $("ttsTime");
-    const statusEl = $("ttsStatus");
-    const speedBtn = $("ttsSpeedBtn");
-    const wave = document.querySelector("#ttsCard .tts-wave");
-    if (!playBtn || !statusEl) return;
+    const panel = $("notesCard");
+    const speedBtn = $("notesSpeed");
+    if (!panel) return;
 
-    let fallback = false;
-    let speaking = false;
+    function activeCard(idx) {
+      return panel.querySelector('.note-item[data-note="' + idx + '"]');
+    }
 
-    function paint(playing) {
-      if (playBtn.isConnected) {
-        playBtn.classList.toggle("is-playing", playing);
-        playBtn.setAttribute("aria-label", playing ? "Jeda nota bersuara" : "Mainkan nota bersuara");
+    function paintPlaying(idx, playing) {
+      const card = activeCard(idx);
+      if (card) {
+        card.classList.toggle("is-playing", playing);
+        card.classList.toggle("is-active", true);
       }
-      if (wave) wave.classList.toggle("is-active", playing);
     }
 
-    function setStatus(text) {
-      if (statusEl.isConnected) statusEl.textContent = text;
+    function setNoteTime(idx, current, duration) {
+      const card = activeCard(idx);
+      if (!card) return;
+      const fill = card.querySelector(".note-fill");
+      const bar = card.querySelector(".note-bar");
+      const timeEl = card.querySelector(".note-time");
+      const fraction = duration ? Math.min(1, current / duration) : 0;
+      if (fill) fill.style.width = Math.round(fraction * 100) + "%";
+      if (bar) bar.setAttribute("aria-valuenow", String(Math.round(fraction * 100)));
+      if (timeEl) timeEl.textContent = formatClock(current) + " / " + formatClock(duration);
     }
 
-    function finish() {
-      paint(false);
-      speakDone();
+    function playCurrentNote(idx) {
+      const note = notes[idx];
+      if (!note) return;
+      const same = notesPlayer.index === idx;
+      if (!same) {
+        try { audio.pause(); } catch (e) { /* abaikan */ }
+        if (window.speechSynthesis) {
+          try { window.speechSynthesis.cancel(); } catch (e) { /* abaikan */ }
+        }
+        notesPlayer.utterance = null;
+        notesPlayer.index = idx;
+        notesPlayer.fallback = false;
+        panel.querySelectorAll(".note-item").forEach(function (card, i) {
+          if (i === idx) {
+            card.classList.add("is-active");
+            return;
+          }
+          card.classList.remove("is-active", "is-playing");
+          const listened = isNoteListened(num, i);
+          const stateEl = card.querySelector(".note-state");
+          const fill = card.querySelector(".note-fill");
+          const bar = card.querySelector(".note-bar");
+          const timeEl = card.querySelector(".note-time");
+          if (stateEl) stateEl.textContent = listened ? "Selesai didengar" : "Belum didengar";
+          if (fill) fill.style.width = listened ? "100%" : "0%";
+          if (bar) bar.setAttribute("aria-valuenow", listened ? "100" : "0");
+          if (timeEl) timeEl.textContent = listened ? "Selesai" : "0:00";
+        });
+        audio.src = notesSource(num, idx);
+        audio.playbackRate = ttsSpeed;
+        const card = activeCard(idx);
+        if (card) {
+          const stateEl = card.querySelector(".note-state");
+          const fill = card.querySelector(".note-fill");
+          if (stateEl) stateEl.textContent = "Memuatkan audio…";
+          if (fill) fill.style.width = "0%";
+        }
+        try { audio.load(); } catch (e) { /* abaikan */ }
+      }
+
+      if (notesPlayer.fallback) {
+        speakNote(idx);
+        return;
+      }
+
+      const promise = audio.play();
+      if (promise && promise.catch) {
+        promise.catch(function () {
+          if (!notesPlayer.fallback) {
+            notesPlayer.fallback = true;
+            updateNoteCard(num, idx);
+            speakNote(idx);
+          }
+        });
+      }
     }
 
-    function speakDone() {
-      speaking = false;
-      if (ttsState.speech === "current") ttsState.speech = null;
-    }
-
-    function speak() {
+    function speakNote(idx) {
+      const note = notes[idx];
       if (!window.speechSynthesis) {
-        toast("Pelayar ini tidak menyokong suara. Sila guna pelayar terkini.", "error");
+        toast("Pelayar ini tidak menyokong suara. Cuba pelayar lain.", "error");
         return;
       }
-      if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
-        window.speechSynthesis.pause();
-        paint(false);
-        setStatus("Suara pelayar dijeda.");
+      const synth = window.speechSynthesis;
+      if (synth.speaking && !synth.paused) {
+        synth.pause();
+        const card = activeCard(idx);
+        if (card) {
+          card.classList.remove("is-playing");
+          const stateEl = card.querySelector(".note-state");
+          if (stateEl) stateEl.textContent = "Suara pelayar dijeda";
+        }
         return;
       }
-      if (window.speechSynthesis.paused) {
-        window.speechSynthesis.resume();
-        paint(true);
-        setStatus("Sedang dimainkan dengan suara pelayar.");
+      if (synth.paused) {
+        synth.resume();
+        const card = activeCard(idx);
+        if (card) {
+          card.classList.add("is-playing");
+          const stateEl = card.querySelector(".note-state");
+          if (stateEl) stateEl.textContent = "Sedang dimainkan";
+        }
         return;
       }
-      const text = topic.narration || topic.title;
-      const utterance = new SpeechSynthesisUtterance(text);
+
+      const utterance = new SpeechSynthesisUtterance(note.narration || note.summary || note.title);
       utterance.lang = "ms-MY";
       utterance.rate = ttsSpeed;
       utterance.pitch = 1;
       try {
-        const voices = window.speechSynthesis.getVoices();
+        const voices = synth.getVoices();
         const voice = voices.find(function (v) { return /^ms/i.test(v.lang); }) ||
           voices.find(function (v) { return /^id/i.test(v.lang); });
         if (voice) utterance.voice = voice;
       } catch (e) { /* guna suara lalai */ }
       utterance.onstart = function () {
-        ttsState.speech = "current";
-        paint(true);
-        setStatus("Sedang dimainkan dengan suara pelayar.");
+        notesPlayer.utterance = utterance;
+        const card = activeCard(idx);
+        if (card) {
+          card.classList.add("is-playing", "is-active");
+          const stateEl = card.querySelector(".note-state");
+          if (stateEl) stateEl.textContent = "Suara pelayar sedang dimainkan";
+        }
       };
       utterance.onend = function () {
-        speakDone();
-        paint(false);
-        setStatus("Tamat. Ketik untuk mendengar semula.");
+        const card = activeCard(idx);
+        if (card) card.classList.remove("is-playing");
+        markNoteListened(num, idx);
+        updateNoteCard(num, idx);
       };
       utterance.onerror = function () {
-        speakDone();
-        paint(false);
-        setStatus("Suara pelayar tidak dapat dimainkan.");
+        const card = activeCard(idx);
+        if (card) card.classList.remove("is-playing");
+        toast("Suara pelayar tidak dapat dimainkan.", "error");
       };
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(utterance);
-    }
-
-    function enableFallback() {
-      if (fallback) return;
-      fallback = true;
-      if (seek) seek.disabled = true;
-      if (timeEl) timeEl.textContent = "Suara pelayar";
-      setStatus("Audio AI tidak tersedia — ketik butang untuk guna suara pelayar.");
+      synth.cancel();
+      synth.speak(utterance);
     }
 
     audio.addEventListener("loadedmetadata", function () {
-      if (!seek) return;
-      seek.disabled = false;
-      seek.max = 1000;
-      if (timeEl) {
-        timeEl.textContent = "0:00 / " + formatClock(audio.duration);
-      }
+      if (notesPlayer.index === null) return;
+      setNoteTime(notesPlayer.index, 0, audio.duration);
     });
 
     audio.addEventListener("timeupdate", function () {
-      if (!seek || !timeEl || !audio.duration) return;
-      seek.value = String(Math.round((audio.currentTime / audio.duration) * 1000));
-      timeEl.textContent = formatClock(audio.currentTime) + " / " + formatClock(audio.duration);
+      const idx = notesPlayer.index;
+      if (idx === null) return;
+      setNoteTime(idx, audio.currentTime, audio.duration);
+      if (audio.duration && audio.currentTime / audio.duration >= 0.9) {
+        markNoteListened(num, idx);
+      }
     });
 
     audio.addEventListener("play", function () {
-      paint(true);
-      setStatus("Sedang dimainkan. Ketik untuk menjeda.");
+      const idx = notesPlayer.index;
+      if (idx === null) return;
+      paintPlaying(idx, true);
+      const card = activeCard(idx);
+      if (card) {
+        const stateEl = card.querySelector(".note-state");
+        if (stateEl) stateEl.textContent = "Sedang dimainkan";
+      }
     });
 
     audio.addEventListener("pause", function () {
-      if (!audio.ended) {
-        paint(false);
-        setStatus("Dijeda. Ketik untuk meneruskan.");
-      }
+      const idx = notesPlayer.index;
+      if (idx === null || audio.ended) return;
+      paintPlaying(idx, false);
+      updateNoteCard(num, idx);
     });
 
     audio.addEventListener("ended", function () {
-      paint(false);
-      setStatus("Tamat. Ketik untuk mendengar semula.");
+      const idx = notesPlayer.index;
+      if (idx === null) return;
+      paintPlaying(idx, false);
+      markNoteListened(num, idx);
       try { audio.currentTime = 0; } catch (e) { /* abaikan */ }
-      if (seek) seek.value = "0";
-      if (timeEl) timeEl.textContent = "0:00 / " + formatClock(audio.duration || 0);
+      const card = activeCard(idx);
+      if (card) {
+        card.classList.remove("is-playing", "is-active");
+        const stateEl = card.querySelector(".note-state");
+        const timeEl = card.querySelector(".note-time");
+        const fill = card.querySelector(".note-fill");
+        const bar = card.querySelector(".note-bar");
+        if (stateEl) stateEl.textContent = "Selesai didengar";
+        if (timeEl) timeEl.textContent = "Selesai";
+        if (fill) fill.style.width = "100%";
+        if (bar) bar.setAttribute("aria-valuenow", "100");
+      }
     });
 
-    audio.addEventListener("error", enableFallback);
+    audio.addEventListener("error", function () {
+      if (notesPlayer.index === null || notesPlayer.topic !== num) return;
+      notesPlayer.fallback = true;
+      const card = activeCard(notesPlayer.index);
+      if (card) {
+        card.classList.remove("is-playing");
+        const stateEl = card.querySelector(".note-state");
+        if (stateEl) stateEl.textContent = "Suara AI tidak tersedia — guna suara pelayar";
+      }
+    });
 
-    playBtn.addEventListener("click", function () {
+    panel.addEventListener("click", function (e) {
+      const btn = e.target.closest("[data-play-note]");
+      if (!btn) return;
+      const idx = Number(btn.getAttribute("data-play-note"));
       SFX.click();
-      if (fallback) {
-        speak();
+      if (notesPlayer.index === idx && notesPlayer.audio && !notesPlayer.audio.paused && !notesPlayer.fallback) {
+        audio.pause();
         return;
       }
-      if (audio.paused) {
-        audio.play().catch(function () {
-          enableFallback();
-        });
-      } else {
-        audio.pause();
+      if (notesPlayer.index === idx && notesPlayer.fallback) {
+        speakNote(idx);
+        return;
       }
+      playCurrentNote(idx);
     });
-
-    if (seek) {
-      seek.addEventListener("input", function () {
-        if (audio.duration) {
-          audio.currentTime = (Number(seek.value) / 1000) * audio.duration;
-        }
-      });
-    }
 
     if (speedBtn) {
       speedBtn.textContent = ttsSpeedLabel();
-      speedBtn.addEventListener("click", cycleTtsSpeed);
+      speedBtn.addEventListener("click", function () {
+        const speeds = [1, 1.25, 1.5, 0.75];
+        const pos = speeds.indexOf(ttsSpeed);
+        ttsSpeed = speeds[(pos + 1) % speeds.length];
+        try { localStorage.setItem(TTS_SPEED_KEY, String(ttsSpeed)); } catch (e) { /* abaikan */ }
+        speedBtn.textContent = ttsSpeedLabel();
+        if (notesPlayer.audio) notesPlayer.audio.playbackRate = ttsSpeed;
+        SFX.click();
+      });
     }
 
-    audio.load();
-
-    window.__lmsTts = { audio: audio, get fallback() { return fallback; } };
+    updateTopicGate(num);
+    window.__lmsNotes = {
+      get audio() { return notesPlayer.audio; },
+      get index() { return notesPlayer.index; }
+    };
   }
 
   /* ============================ API ============================ */
@@ -824,7 +1039,7 @@
   }
 
   function showCover() {
-    stopTts();
+    stopNotesAudio();
     els.app.hidden = true;
     els.cover.hidden = false;
     renderCoverState();
@@ -876,7 +1091,7 @@
   }
 
   function clearProgress() {
-    stopTts();
+    stopNotesAudio();
     state = freshState();
     drafts = {};
     results = {};
@@ -934,7 +1149,7 @@
       toast("Selesaikan langkah sebelumnya dahulu untuk membuka bahagian ini.");
       return;
     }
-    stopTts();
+    stopNotesAudio();
     currentStep = id;
     state.lastStep = id;
     saveState();
@@ -974,21 +1189,27 @@
           '<div class="hero-steps" aria-hidden="true">' + heroDots + "</div>" +
         "</header>" +
         '<div class="topic-body">' +
-          ttsPanelMarkup(num) +
+          notesPanelMarkup(num) +
           topic.html +
           '<div class="lesson-actions">' +
             "<div><strong>" + (done ? "Topik ini telah selesai." : "Sudah faham?") + "</strong>" +
-              '<p class="note">' + (done
+              '<p class="note" id="lessonNote">' + (done
                 ? "Anda boleh baca semula pada bila-bila masa. Teruskan ke kuiz untuk menguji kefahaman."
-                : "Tandakan topik ini selesai untuk membuka Kuiz " + num + ".") + "</p></div>" +
-            '<button id="completeTopic" type="button" class="btn btn-primary">' +
-              "<span>" + (done ? "Teruskan ke Kuiz " + num : "Saya telah faham — teruskan") + "</span>" + SVG.arrow +
+                : "Dengar semua nota bersuara di atas untuk membuka butang ini.") + "</p></div>" +
+            '<button id="completeTopic" type="button" class="btn btn-primary"' + (allNotesListened(num) ? "" : " disabled") + ">" +
+              "<span>" + (allNotesListened(num)
+                ? (done ? "Teruskan ke Kuiz " + num : "Saya telah faham — teruskan")
+                : "Dengar semua nota dahulu (" + listenedNotesCount(num) + "/" + notesOf(num).length + ")") + "</span>" + SVG.arrow +
             "</button>" +
           "</div>" +
         "</div>" +
       "</article>";
 
     $("completeTopic").addEventListener("click", function () {
+      if (!allNotesListened(num)) {
+        toast("Dengar semua nota bersuara terlebih dahulu sebelum meneruskan.");
+        return;
+      }
       if (state.completedTopics.indexOf(num) === -1) {
         state.completedTopics.push(num);
         state.completedTopics.sort(function (a, b) { return a - b; });
@@ -1000,7 +1221,7 @@
       navigate("kuiz" + num);
     });
 
-    bindTts(num);
+    bindNotes(num);
   }
 
   /* ============================ KUIZ: DRAF ============================ */
