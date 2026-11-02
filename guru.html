@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Dashboard Guru — LMS Maruah Diri Cermin Peribadi">
+  <title>Dashboard Guru | LMS Maruah Diri</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230b6b4f'/%3E%3Cpath d='M40 18a14 14 0 1 0 0 28 16 16 0 1 1 0-28z' fill='%23e7c26a'/%3E%3Ccircle cx='44' cy='22' r='3' fill='%23e7c26a'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/guru.css">
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="g-head">
+    <a class="g-brand" href="guru.html">
+      <span class="g-mark">
+        <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M42 12a20 20 0 1 0 0 40 23 23 0 1 1 0-40z" fill="currentColor"/><circle cx="45" cy="18" r="4" fill="currentColor"/></svg>
+      </span>
+      <span>
+        <strong>Dashboard Guru</strong>
+        <small>Maruah Diri • Pendidikan Islam T1</small>
+      </span>
+    </a>
+    <div class="g-head-actions">
+      <a class="g-link" href="index.html">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16"/></svg>
+        Modul Murid
+      </a>
+      <button id="logoutBtn" class="g-btn g-btn-quiet g-btn-small" type="button" hidden>Log Keluar</button>
+    </div>
+  </header>
+
+  <!-- ========================= LOG MASUK ========================= -->
+  <main id="loginView" class="login-wrap">
+    <section class="login-card">
+      <div class="login-icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+      </div>
+      <span class="g-eyebrow">Akses Guru</span>
+      <h1>Pantau murid,<br>beri respons bermakna.</h1>
+      <p class="login-desc">Lihat keputusan kuiz murid dan hantar maklum balas peribadi selepas mereka melengkapkan modul Maruah Diri.</p>
+
+      <form id="loginForm" class="login-form" novalidate>
+        <label class="g-field">
+          <span>URL Web App Apps Script</span>
+          <input id="apiUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="url" required>
+          <small>Salin URL <strong>/exec</strong> selepas deploy Apps Script.</small>
+        </label>
+        <label class="g-field">
+          <span>Kunci guru</span>
+          <input id="teacherKey" type="password" placeholder="Masukkan kunci guru" autocomplete="current-password" required>
+          <small>Gunakan kunci guru yang ditetapkan dalam <code>TEACHER_KEY</code> pada backend Apps Script.</small>
+        </label>
+        <p id="loginError" class="g-error" role="alert" hidden></p>
+        <button id="loginBtn" type="submit" class="g-btn g-btn-primary g-btn-block">
+          <span>Masuk Dashboard</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+        </button>
+      </form>
+
+      <div class="login-foot">
+        <span class="dot"></span>
+        <p>Kunci disimpan hanya dalam sesi pelayar ini. Jangan kongsi kunci guru kepada murid.</p>
+      </div>
+    </section>
+
+    <aside class="login-aside">
+      <div class="aside-panel">
+        <h2>Aliran kerja guru</h2>
+        <ol class="steps-list">
+          <li>
+            <span>1</span>
+            <div><strong>Deploy backend</strong><p>Tampal <code>apps-script/Code.gs</code> ke Google Apps Script dan deploy sebagai Web App.</p></div>
+          </li>
+          <li>
+            <span>2</span>
+            <div><strong>Tetapkan URL</strong><p>Tampal URL <code>/exec</code> dalam <code>assets/js/config.js</code> supaya murid boleh menghantar keputusan.</p></div>
+          </li>
+          <li>
+            <span>3</span>
+            <div><strong>Semak keputusan</strong><p>Gunakan dashboard ini untuk melihat markah kuiz dan jawapan murid.</p></div>
+          </li>
+          <li>
+            <span>4</span>
+            <div><strong>Beri respons</strong><p>Pilih status dan tulis ulasan. Murid boleh melihatnya pada skrin sijil.</p></div>
+          </li>
+        </ol>
+      </div>
+      <div class="aside-quote">
+        <span>“</span>
+        <p>Respons guru yang membina membantu murid melihat nilai di sebalik setiap usaha.</p>
+      </div>
+    </aside>
+  </main>
+
+  <!-- ========================= DASHBOARD ========================= -->
+  <main id="dashboardView" class="dash" hidden>
+    <section class="dash-hero">
+      <div>
+        <span class="g-eyebrow light">Ruang Guru</span>
+        <h1>Keputusan &amp; Respons Murid</h1>
+        <p>Modul Pelajaran 30 — Maruah Diri Cermin Peribadi. Semak kemajuan dan berikan maklum balas peribadi.</p>
+      </div>
+      <div class="dash-hero-actions">
+        <a id="sheetLink" class="g-btn g-btn-gold" href="#" target="_blank" rel="noopener" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+          Buka Google Sheet
+        </a>
+        <button id="refreshBtn" class="g-btn g-btn-outline" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+          Muat Semula
+        </button>
+      </div>
+    </section>
+
+    <section class="stats-grid" id="statsGrid">
+      <article class="stat-card">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="M17 11a3 3 0 1 0 0-6"/><path d="M18 21a5 5 0 0 0-3-4.6"/></svg>
+        </div>
+        <div><small>Jumlah Murid</small><strong id="statTotal">0</strong><span>rekod dihantar</span></div>
+      </article>
+      <article class="stat-card">
+        <div class="stat-icon green">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7L9 18l-5-5"/></svg>
+        </div>
+        <div><small>Lulus</small><strong id="statPassed">0</strong><span>semua kuiz</span></div>
+      </article>
+      <article class="stat-card">
+        <div class="stat-icon gold">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.6-4.8 2.6.9-5.4L4.2 8.7l5.4-.8z"/></svg>
+        </div>
+        <div><small>Purata Markah</small><strong id="statAverage">0%</strong><span>keseluruhan modul</span></div>
+      </article>
+      <article class="stat-card">
+        <div class="stat-icon clay">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div><small>Belum Diulas</small><strong id="statPending">0</strong><span>menunggu respons</span></div>
+      </article>
+    </section>
+
+    <section class="results-panel">
+      <div class="results-head">
+        <div>
+          <h2>Senarai Keputusan</h2>
+          <p id="lastUpdated" class="muted">Belum dimuatkan.</p>
+        </div>
+        <div class="table-tools">
+          <label class="search-box">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+            <input id="searchInput" type="search" placeholder="Cari nama atau kelas…" autocomplete="off">
+          </label>
+          <select id="filterSelect" class="g-select" aria-label="Tapis keputusan">
+            <option value="all">Semua murid</option>
+            <option value="pending">Belum diulas</option>
+            <option value="reviewed">Sudah diulas</option>
+            <option value="cemerlang">Status: Cemerlang</option>
+            <option value="baik">Status: Baik</option>
+            <option value="bimbingan">Status: Perlu Bimbingan</option>
+          </select>
+          <label class="auto-refresh">
+            <input id="autoRefresh" type="checkbox">
+            <span>Auto</span>
+          </label>
+          <button id="exportBtn" class="g-btn g-btn-outline g-btn-small" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+            CSV
+          </button>
+        </div>
+      </div>
+
+      <div id="tableWrap" class="table-wrap">
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th>Murid</th>
+              <th>Tarikh Hantar</th>
+              <th>Markah</th>
+              <th>Kuiz</th>
+              <th>Respons</th>
+              <th class="th-action">Tindakan</th>
+            </tr>
+          </thead>
+          <tbody id="resultsBody"></tbody>
+        </table>
+        <div id="emptyState" class="empty-state" hidden>
+          <div class="empty-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16"/></svg>
+          </div>
+          <h3>Tiada keputusan untuk dipaparkan</h3>
+          <p>Keputusan murid akan muncul di sini selepas mereka melengkapkan semua kuiz dan backend disambungkan.</p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="dash-foot">
+      <span>LMS Maruah Diri • Dashboard Guru</span>
+      <span>Keputusan disimpan dalam Google Sheet peribadi anda.</span>
+    </footer>
+  </main>
+
+  <!-- ========================= MODAL RESPONS ========================= -->
+  <dialog id="feedbackModal" class="feedback-modal">
+    <div class="modal-head">
+      <div>
+        <span class="g-eyebrow">Respons Murid</span>
+        <h2 id="modalName">Nama Murid</h2>
+        <p id="modalMeta" class="muted"></p>
+      </div>
+      <button id="modalClose" class="icon-close" type="button" aria-label="Tutup">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="modal-summary">
+        <div class="ms-card"><small>Markah</small><strong id="modalPercent">0%</strong></div>
+        <div class="ms-card"><small>Tempoh</small><strong id="modalDuration">0 minit</strong></div>
+        <div class="ms-card"><small>Percubaan</small><strong id="modalAttempts">0</strong></div>
+        <div class="ms-card"><small>No. Sijil</small><strong id="modalCert">—</strong></div>
+      </div>
+
+      <div id="modalQuizBreakdown" class="quiz-breakdown"></div>
+
+      <details class="answers-details">
+        <summary>Lihat jawapan murid <span id="answersCount"></span></summary>
+        <div id="modalAnswers" class="answers-list"></div>
+      </details>
+
+      <form id="feedbackForm" class="feedback-form">
+        <div class="form-head">
+          <h3>Maklum balas kepada murid</h3>
+          <div class="template-buttons">
+            <button type="button" class="chip-btn" data-template="cemerlang">Cemerlang</button>
+            <button type="button" class="chip-btn" data-template="baik">Baik</button>
+            <button type="button" class="chip-btn" data-template="bimbingan">Bimbingan</button>
+          </div>
+        </div>
+
+        <label class="g-field">
+          <span>Status pencapaian</span>
+          <select id="feedbackStatus" class="g-select">
+            <option value="">Belum diulas</option>
+            <option value="cemerlang">Cemerlang</option>
+            <option value="baik">Baik</option>
+            <option value="bimbingan">Perlu Bimbingan</option>
+          </select>
+        </label>
+
+        <label class="g-field">
+          <span>Ulasan guru</span>
+          <textarea id="feedbackText" rows="5" maxlength="1500" placeholder="Tulis maklum balas yang membina untuk murid ini…"></textarea>
+          <small><span id="charCount">0</span>/1500 aksara. Ulasan akan dipaparkan pada skrin sijil murid.</small>
+        </label>
+
+        <p id="feedbackError" class="g-error" role="alert" hidden></p>
+
+        <div class="modal-actions">
+          <button id="cancelFeedback" class="g-btn g-btn-quiet" type="button">Batal</button>
+          <button id="saveFeedbackBtn" class="g-btn g-btn-primary" type="submit">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4z"/></svg>
+            Simpan Respons
+          </button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <div id="toast" class="g-toast" role="status" aria-live="polite"></div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/guru.js"></script>
+</body>
+</html>

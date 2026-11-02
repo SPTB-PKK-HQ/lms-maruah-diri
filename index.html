@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="LMS Pendidikan Islam Tingkatan 1 — Pelajaran 30: Maruah Diri Cermin Peribadi">
+  <title>Maruah Diri, Cermin Peribadi | LMS Pendidikan Islam</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230b6b4f'/%3E%3Cpath d='M40 18a14 14 0 1 0 0 28 16 16 0 1 1 0-28z' fill='%23e7c26a'/%3E%3Ccircle cx='44' cy='22' r='3' fill='%23e7c26a'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div class="page-grain" aria-hidden="true"></div>
+
+  <!-- ======================= SKRIN MULA ======================= -->
+  <section id="cover" class="cover">
+    <div class="cover-arch cover-arch-a" aria-hidden="true"></div>
+    <div class="cover-arch cover-arch-b" aria-hidden="true"></div>
+
+    <header class="cover-nav">
+      <a class="brand" href="#" aria-label="Laman utama LMS">
+        <span class="brand-mark">
+          <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M42 12a20 20 0 1 0 0 40 23 23 0 1 1 0-40z" fill="currentColor"/><circle cx="45" cy="18" r="4" fill="currentColor"/></svg>
+        </span>
+        <span class="brand-text">
+          <strong>LMS Pendidikan Islam</strong>
+          <small>Tingkatan 1</small>
+        </span>
+      </a>
+      <a class="nav-ghost" href="guru.html">Dashboard Guru</a>
+    </header>
+
+    <div class="cover-grid">
+      <div class="cover-copy">
+        <span class="eyebrow"><span class="eyebrow-dot"></span>Pelajaran 30 • Akhlak Islamiyah</span>
+        <h1>Maruah Diri,<br><span class="title-accent">Cermin Peribadi.</span></h1>
+        <p class="cover-lead">Setiap daripada kita memiliki cermin yang memantulkan iman, akhlak dan harga diri. Jom pelajari cara menjaganya agar sentiasa bersinar.</p>
+
+        <div class="meta-row">
+          <span class="meta-chip">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16"/></svg>
+            4 topik
+          </span>
+          <span class="meta-chip">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l2 2 4-4"/><path d="M21 12a9 9 0 1 1-9-9"/></svg>
+            4 kuiz
+          </span>
+          <span class="meta-chip">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            30–45 minit
+          </span>
+          <span class="meta-chip">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.6-4.8 2.6.9-5.4L4.2 8.7l5.4-.8z"/></svg>
+            Sijil digital
+          </span>
+        </div>
+
+        <ul class="cover-points">
+          <li><span class="tick"></span>Belajar mengikut rentak sendiri</li>
+          <li><span class="tick"></span>Kuiz interaktif selepas setiap topik</li>
+          <li><span class="tick"></span>Sijil penghargaan boleh dimuat turun</li>
+          <li><span class="tick"></span>Dapat respons peribadi daripada guru</li>
+        </ul>
+      </div>
+
+      <div class="cover-card">
+        <div class="card-arch" aria-hidden="true"></div>
+        <div class="card-inner">
+          <div class="card-mark">
+            <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M42 12a20 20 0 1 0 0 40 23 23 0 1 1 0-40z" fill="currentColor"/><circle cx="45" cy="18" r="4" fill="currentColor"/></svg>
+          </div>
+          <h2 id="coverCardTitle">Selamat datang</h2>
+          <p id="coverCardDesc" class="card-desc">Isi butiran diri untuk memulakan pengembaraan ilmu.</p>
+
+          <form id="startForm" novalidate>
+            <label class="field">
+              <span>Nama penuh</span>
+              <input id="studentName" type="text" name="name" placeholder="Contoh: Nur Aisyah binti Ahmad" maxlength="80" autocomplete="name" required>
+            </label>
+            <label class="field">
+              <span>Kelas</span>
+              <input id="studentClass" type="text" name="className" placeholder="Contoh: 1 Amanah" maxlength="30" autocomplete="off" required>
+            </label>
+            <p id="formError" class="form-error" role="alert" hidden></p>
+            <button id="startBtn" class="btn btn-primary btn-block" type="submit">
+              <span>Mulakan Pembelajaran</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+            </button>
+          </form>
+
+          <div id="resumeBox" class="resume-box" hidden>
+            <div class="resume-top">
+              <span>Progres tersimpan</span>
+              <strong id="resumePercent">0%</strong>
+            </div>
+            <div class="progress-track"><span id="resumeBar"></span></div>
+            <p id="resumeMeta" class="muted"></p>
+            <div class="resume-actions">
+              <button id="resumeBtn" class="btn btn-primary btn-block" type="button">Sambung Pembelajaran</button>
+              <button id="newStartBtn" class="btn btn-quiet btn-block" type="button">Mula semula dari awal</button>
+            </div>
+          </div>
+
+          <p class="privacy-note">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+            Progres anda disimpan secara automatik pada peranti ini.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <footer class="cover-footer">
+      <span>Kurikulum Standard Sekolah Menengah • Pendidikan Islam</span>
+      <span>Dibina untuk pembelajaran yang bermakna</span>
+    </footer>
+  </section>
+
+  <!-- ======================= APLIKASI ======================= -->
+  <div id="app" class="app" hidden>
+    <header class="topbar">
+      <a class="brand brand-compact" href="#" id="brandHome" aria-label="Kembali ke halaman mula">
+        <span class="brand-mark">
+          <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M42 12a20 20 0 1 0 0 40 23 23 0 1 1 0-40z" fill="currentColor"/><circle cx="45" cy="18" r="4" fill="currentColor"/></svg>
+        </span>
+        <span class="brand-text">
+          <strong>Maruah Diri</strong>
+          <small>Pelajaran 30</small>
+        </span>
+      </a>
+
+      <div class="topbar-progress" title="Kemajuan pembelajaran">
+        <div class="progress-copy">
+          <span id="progressLabel">0 / 8 langkah</span>
+          <strong id="progressPercent">0%</strong>
+        </div>
+        <div class="progress-track progress-track-thin"><span id="progressBar"></span></div>
+      </div>
+
+      <div class="topbar-right">
+        <button id="feedbackShortcut" class="icon-btn" type="button" title="Maklum balas guru" aria-label="Maklum balas guru" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </button>
+        <button id="resetBtn" class="icon-btn" type="button" title="Mula semula" aria-label="Mula semula">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+        </button>
+        <div class="student-chip">
+          <span id="studentInitial">M</span>
+          <div>
+            <strong id="studentChipName">Murid</strong>
+            <small id="studentChipClass">Tingkatan 1</small>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="shell">
+      <aside class="sidebar">
+        <div class="sidebar-heading">
+          <span>Kandungan Modul</span>
+          <small id="sidebarProgress">0% selesai</small>
+        </div>
+        <nav id="stepNav" class="step-nav" aria-label="Navigasi modul"></nav>
+        <div class="sidebar-foot">
+          <div class="mini-quote">
+            <span>“</span>
+            <p>Maruah yang terjaga membuka pintu kepercayaan.</p>
+          </div>
+          <button id="sidebarReset" class="btn btn-quiet btn-small" type="button">Mula semula</button>
+        </div>
+      </aside>
+
+      <main id="content" class="content" tabindex="-1"></main>
+    </div>
+  </div>
+
+  <canvas id="confetti" class="confetti" aria-hidden="true"></canvas>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/content.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
